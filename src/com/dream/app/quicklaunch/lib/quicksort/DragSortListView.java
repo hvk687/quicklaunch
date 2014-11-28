@@ -38,10 +38,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Checkable;
-import android.widget.ListAdapter;
-import android.widget.ListView;
+import android.widget.*;
 import com.dream.app.quicklaunch.R;
 
 import java.io.File;
@@ -2410,7 +2407,7 @@ public class DragSortListView extends ListView {
      * Interface for customization of the floating View appearance
      * and dragging behavior. Implement
      * your own and pass it to {@link #setFloatViewManager}. If
-     * your own is not passed, the default {@link com.dream.app.quicklaunch.lib.quicksort.SimpleFloatViewManager}
+     * your own is not passed, the default {@link SimpleFloatViewManager}
      * implementation is used.
      */
     public interface FloatViewManager {
@@ -2440,7 +2437,7 @@ public class DragSortListView extends ListView {
          * @param location      The location (top-left; relative to DSLV
          *                      top-left) at which the float
          *                      View would like to appear, given the current touch location
-         *                      and the offset provided in {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView#startDrag}.
+         *                      and the offset provided in {@link DragSortListView#startDrag}.
          * @param touch         The current touch location (relative to DSLV
          *                      top-left).
          * @param pendingScroll
@@ -2553,7 +2550,7 @@ public class DragSortListView extends ListView {
     /**
      * Completely custom scroll speed profile. Default increases linearly
      * with position and is constant in time. Create your own by implementing
-     * {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView.DragScrollProfile}.
+     * {@link DragSortListView.DragScrollProfile}.
      *
      * @param ssp
      */
@@ -2769,7 +2766,7 @@ public class DragSortListView extends ListView {
     /**
      * Interface for controlling
      * scroll speed as a function of touch position and time. Use
-     * {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView#setDragScrollProfile(DragScrollProfile)} to
+     * {@link DragSortListView#setDragScrollProfile(DragScrollProfile)} to
      * set custom profile.
      *
      * @author heycosmo

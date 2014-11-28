@@ -20,8 +20,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ImageView;
 
 // taken from sdk/sources/android-16/android/widget/SimpleCursorAdapter.java
 
@@ -101,7 +101,7 @@ public class SimpleDragSortCursorAdapter extends ResourceDragSortCursorAdapter {
      *            are given the values of the first N columns in the from
      *            parameter.  Can be null if the cursor is not available yet.
      * @param flags Flags used to determine the behavior of the adapter,
-     * as per {@link CursorAdapter#CursorAdapter(android.content.Context, android.database.Cursor, int)}.
+     * as per {@link CursorAdapter#CursorAdapter( android.content.Context, android.database.Cursor, int)}.
      */
     public SimpleDragSortCursorAdapter(Context context, int layout,
             Cursor c, String[] from, int[] to, int flags) {
@@ -121,9 +121,9 @@ public class SimpleDragSortCursorAdapter extends ResourceDragSortCursorAdapter {
      * {@link ViewBinder#setViewValue(android.view.View, android.database.Cursor, int)}
      * is invoked. If the returned value is true, binding has occured. If the
      * returned value is false and the view to bind is a TextView,
-     * {@link #setViewText(android.widget.TextView, String)} is invoked. If the returned value is
+     * {@link #setViewText( android.widget.TextView, String)} is invoked. If the returned value is
      * false and the view to bind is an ImageView,
-     * {@link #setViewImage(android.widget.ImageView, String)} is invoked. If no appropriate
+     * {@link #setViewImage( android.widget.ImageView, String)} is invoked. If no appropriate
      * binding can be found, an {@link IllegalStateException} is thrown.
      *
      * @throws IllegalStateException if binding cannot occur
@@ -132,8 +132,8 @@ public class SimpleDragSortCursorAdapter extends ResourceDragSortCursorAdapter {
      *      android.content.Context, android.database.Cursor)
      * @see #getViewBinder()
      * @see #setViewBinder(android.widget.SimpleCursorAdapter.ViewBinder)
-     * @see #setViewImage(android.widget.ImageView, String)
-     * @see #setViewText(android.widget.TextView, String)
+     * @see #setViewImage( android.widget.ImageView, String)
+     * @see #setViewText( android.widget.TextView, String)
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
@@ -381,8 +381,8 @@ public class SimpleDragSortCursorAdapter extends ResourceDragSortCursorAdapter {
      * SimpleCursorAdapter.
      *
      * @see SimpleCursorAdapter#bindView(android.view.View, android.content.Context, android.database.Cursor)
-     * @see SimpleCursorAdapter#setViewImage(android.widget.ImageView, String)
-     * @see SimpleCursorAdapter#setViewText(android.widget.TextView, String)
+     * @see SimpleCursorAdapter#setViewImage( android.widget.ImageView, String)
+     * @see SimpleCursorAdapter#setViewText( android.widget.TextView, String)
      */
     public static interface ViewBinder {
         /**

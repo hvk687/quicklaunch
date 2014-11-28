@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">quicklaunch</string>
+    <string name="app_picker_title">App Picker</string>
 </resources>

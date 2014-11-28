@@ -1,19 +1,23 @@
 package com.dream.app.quicklaunch.lib.quicksort;
 
 import android.graphics.Point;
-import android.view.*;
+import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.AdapterView;
 
 /**
- * Class that starts and stops item drags on a {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView}
+ * Class that starts and stops item drags on a {@link DragSortListView}
  * based on touch gestures. This class also inherits from
  * {@link SimpleFloatViewManager}, which provides basic float View
  * creation.
  *
  * An instance of this class is meant to be passed to the methods
- * {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView#setTouchListener()} and
- * {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView#setFloatViewManager()} of your
- * {@link com.dream.app.quicklaunch.lib.quicksort.DragSortListView} instance.
+ * {@link DragSortListView#setTouchListener()} and
+ * {@link DragSortListView#setFloatViewManager()} of your
+ * {@link DragSortListView} instance.
  */
 public class DragSortController extends SimpleFloatViewManager implements View.OnTouchListener, GestureDetector.OnGestureListener {
 
@@ -78,7 +82,7 @@ public class DragSortController extends SimpleFloatViewManager implements View.O
     private int mPositionX;
 
     /**
-     * Calls {@link #DragSortController(com.dream.app.quicklaunch.lib.quicksort.DragSortListView, int)} with a
+     * Calls {@link #DragSortController(DragSortListView, int)} with a
      * 0 drag handle id, FLING_RIGHT_REMOVE remove mode,
      * and ON_DOWN drag init. By default, sorting is enabled, and
      * removal is disabled.
