@@ -6,8 +6,9 @@ import android.graphics.drawable.Drawable;
 public class AppInfo {
 
     private String appLabel;    //应用程序标签
-    private Drawable appIcon;  //应用程序图像
-    private Intent intent;     //启动应用程序的Intent ，一般是Action为Main和Category为Lancher的Activity
+
+    private transient Drawable appIcon;  //应用程序图像
+    private transient Intent intent;     //启动应用程序的Intent ，一般是Action为Main和Category为Lancher的Activity
     private String pkgName;    //应用程序所对应的包名
 
     public AppInfo() {

@@ -10,4 +10,7 @@
     <color name="bg_handle_pressed">#a0a0a0</color>
     <color name="background">#e5e5e5</color>
     <color name="blue_1">#1E88E5</color>
+    <color name="blue_2">#0063cc</color>
+    <color name="green">#00FF00</color>
+
 </resources>

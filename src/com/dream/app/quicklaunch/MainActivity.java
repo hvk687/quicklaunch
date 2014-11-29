@@ -4,19 +4,25 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.dream.app.quicklaunch.adapter.QuickLaunchAdapter;
+import com.dream.app.quicklaunch.adapter.QuickLaunchDialogAdapter;
 import com.dream.app.quicklaunch.lib.quicksort.DragSortController;
 import com.dream.app.quicklaunch.lib.quicksort.DragSortListView;
 import com.dream.app.quicklaunch.model.AppInfo;
 import com.dream.app.quicklaunch.util.SharedPreferenceUtils;
 import com.dream.app.quicklaunch.util.StringUtils;
+import com.gc.materialdesign.views.ButtonFloat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,20 +31,24 @@ import java.util.List;
 public class MainActivity extends Activity {
 
     QuickLaunchAdapter mAdapter;
-    List<AppInfo> mlistAppInfo = new ArrayList<AppInfo>();
+    List<AppInfo> mInstalledAppInfo = new ArrayList<AppInfo>();
     List<AppInfo> mSelectedAppInfos = new ArrayList<AppInfo>();
     List<AppInfo> mDefaultAppInfos = new ArrayList<AppInfo>();
-
+    ButtonFloat mBtnAdd;
+    boolean isAdd = false; //true, add, false change;
     private static final String SELECTED_APP_LIST = "selected_app_list";
     Dialog mPickerDialog;
+    int mClickedPos = 0;
+    QuickLaunchDialogAdapter mPickerAdapter;
     private DragSortListView.DropListener onDrop =
             new DragSortListView.DropListener() {
                 @Override
                 public void drop(int from, int to) {
                     if (from != to) {
-//                        String item = adapter.getItem(from);
-//                        adapter.remove(item);
-//                        adapter.insert(item, to);
+                        AppInfo item = mSelectedAppInfos.get(from);
+                        mSelectedAppInfos.remove(from);
+                        mSelectedAppInfos.add(to, item);
+                        mAdapter.notifyDataSetChanged();
                     }
                 }
             };
@@ -47,7 +57,8 @@ public class MainActivity extends Activity {
             new DragSortListView.RemoveListener() {
                 @Override
                 public void remove(int which) {
-//                    adapter.remove(adapter.getItem(which));
+                    mSelectedAppInfos.remove(which);
+                    mAdapter.notifyDataSetChanged();
                 }
             };
 
@@ -106,35 +117,65 @@ public class MainActivity extends Activity {
         mDslv.setDragEnabled(dragEnabled);
         mDslv.setDropListener(onDrop);
         mDslv.setRemoveListener(onRemove);
+        mDslv.setOnItemClickListener(mItemClickListener);
         mAdapter = new QuickLaunchAdapter(this);
         mAdapter.setDataList(mSelectedAppInfos);
         mDslv.setAdapter(mAdapter);
+        findViewById(R.id.back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        //btn
+        mBtnAdd = (ButtonFloat) findViewById(R.id.add);
+        mBtnAdd.setOnClickListener(mAddClickListener);
     }
 
     public void queryAppInfo() {
-        mlistAppInfo.clear();
+        mInstalledAppInfo.clear();
         PackageManager pm = this.getPackageManager(); // 获得PackageManager对象
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         // 通过查询，获得所有ResolveInfo对象.
         List<ResolveInfo> resolveInfos = pm
-                .queryIntentActivities(mainIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                .queryIntentActivities(mainIntent, 0);
         // 调用系统排序 ， 根据name排序
         // 该排序很重要，否则只能显示系统应用，而不能列出第三方应用程序
         Collections.sort(resolveInfos, new ResolveInfo.DisplayNameComparator(pm));
-        if (mlistAppInfo != null) {
-            mlistAppInfo.clear();
-            for (ResolveInfo reInfo : resolveInfos) {
-                mlistAppInfo.add(makeAppInfo(reInfo, pm)); // 添加至列表中
-            }
+        if (mInstalledAppInfo == null) {
+            mInstalledAppInfo = new ArrayList<AppInfo>();
+        }
+        mInstalledAppInfo.clear();
+        //add home to the first
+        mInstalledAppInfo.add(loadDefaultHome());
+        //add other app info
+        for (ResolveInfo reInfo : resolveInfos) {
+            mInstalledAppInfo.add(makeAppInfo(reInfo, pm)); // 添加至列表中
         }
     }
 
     private void initDialog() {
         //init dialog adapter
-        mPickerDialog = new AlertDialog.Builder(this).setTitle(R.string.app_picker_title).create();
-
+        mPickerAdapter = new QuickLaunchDialogAdapter(this);
+        mPickerDialog = new AlertDialog.Builder(this).
+                setTitle(R.string.app_picker_title).
+                setPositiveButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mPickerDialog.dismiss();
+                    }
+                }).
+                setAdapter(mPickerAdapter, mDialogClickListener).create();
+        mPickerAdapter.setDataList(mInstalledAppInfo);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        saveSelectedApp();
+    }
+
 
     /**
      *
@@ -157,6 +198,7 @@ public class MainActivity extends Activity {
             String json = SharedPreferenceUtils.getSharedPreferences(SELECTED_APP_LIST, this);
             if (!StringUtils.isNullOrEmpty(json)) {
                 mSelectedAppInfos = JSON.parseArray(json, AppInfo.class);
+                parseDrawable();
                 return;
             }
         } catch (Exception e) {
@@ -176,12 +218,34 @@ public class MainActivity extends Activity {
     }
 
     /**
+     * after load saved app information,
+     * we should set the drawable for them
+     */
+    private void parseDrawable() {
+        if (mSelectedAppInfos == null || mSelectedAppInfos.size() <= 0) {
+            return;
+        }
+        PackageManager pm = this.getPackageManager(); // 获得PackageManager对象
+
+        for (AppInfo info : mSelectedAppInfos) {
+            Intent mainIntent = new Intent();
+            mainIntent.setPackage(info.getPkgName());
+            List<ResolveInfo> resolveInfos = pm
+                    .queryIntentActivities(mainIntent, 0);
+            if (resolveInfos != null && resolveInfos.size() > 0) {
+                AppInfo parsed = makeAppInfo(resolveInfos.get(0), pm);
+                info.setIntent(parsed.getIntent());
+                info.setAppIcon(parsed.getAppIcon());
+            }
+        }
+    }
+
+    /**
      * start home activity
      */
     private AppInfo loadDefaultHome() {
         PackageManager pm = this.getPackageManager(); // 获得PackageManager对象
         Intent mainIntent = new Intent(Intent.ACTION_MAIN);
-        mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mainIntent.addCategory(Intent.CATEGORY_HOME);
 
         // 通过查询，获得所有ResolveInfo对象.
@@ -226,4 +290,57 @@ public class MainActivity extends Activity {
         return appInfo;
     }
 
+    /**
+     * user choose one item
+     */
+    private DialogInterface.OnClickListener mDialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            if (!isAdd) {
+                mSelectedAppInfos.set(mClickedPos, mInstalledAppInfo.get(i));
+                mAdapter.notifyDataSetChanged();
+            } else {
+                /**
+                 * filter, DO NOT add the package if user has added this package
+                 */
+                for (AppInfo info : mSelectedAppInfos) {
+                    if (info.getPkgName().equals(mInstalledAppInfo.get(i).getPkgName())) {
+                        Toast.makeText(MainActivity.this, R.string.app_duplcate_hint, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                /**
+                 * add the app to list if not added before
+                 */
+                mSelectedAppInfos.add(mInstalledAppInfo.get(i));
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
+
+    /**
+     * change click listener
+     */
+    private AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            mClickedPos = i;
+            isAdd = false;
+            mPickerDialog.show();
+        }
+    };
+    /**
+     * add click listener
+     */
+    private View.OnClickListener mAddClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (mSelectedAppInfos != null && mSelectedAppInfos.size() < 4) {
+                isAdd = true;
+                mPickerDialog.show();
+            } else {
+                Toast.makeText(MainActivity.this, R.string.app_limit_hint, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 }

@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">quicklaunch</string>
     <string name="app_picker_title">App Picker</string>
+    <string name="app_limit_hint">Reach 4 apps limitation!</string>
+    <string name="app_duplcate_hint">Already added!</string>
 </resources>

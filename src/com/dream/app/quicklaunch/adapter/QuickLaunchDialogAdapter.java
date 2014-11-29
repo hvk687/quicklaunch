@@ -19,6 +19,8 @@ public class QuickLaunchDialogAdapter extends AbsListAdapter<AppInfo> {
         if (view == null) {
             view = new QuickLaunchPickerItemView(mContext);
         }
+        QuickLaunchPickerItemView itemView = (QuickLaunchPickerItemView) view;
+        itemView.bindView(getItem(pos));
         return view;
     }
 }
