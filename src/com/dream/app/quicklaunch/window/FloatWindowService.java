@@ -17,6 +17,12 @@ public class FloatWindowService extends Service {
     public static final String ACTION_REPEAT_SERVICE = "action_repeat_service";
 
     @Override
+    public void onCreate() {
+        super.onCreate();startRepeatingSystemService(this);
+
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -25,7 +31,8 @@ public class FloatWindowService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if (intent != null) {
-            startRepeatingSystemService(this);
+            Log.d(TAG, "onStartCommand:" + intent.getAction());
+
             String action = intent.getAction();
             if (ACTION_SHOW_WINDOW.equals(action)) {
                 showWindow();
@@ -53,6 +60,8 @@ public class FloatWindowService extends Service {
     }
 
     public void startRepeatingSystemService(Context context) {
+
+
         Intent intent = new Intent(context, RepeatBroadcastReceiver.class);
         intent.setAction(FloatWindowService.ACTION_REPEAT_SERVICE);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
@@ -60,6 +69,7 @@ public class FloatWindowService extends Service {
         //开始时间
         long firstime = SystemClock.elapsedRealtime();
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.cancel(sender);//cancel if we have set one
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, firstime, 5 * 1000, sender);
     }
 }

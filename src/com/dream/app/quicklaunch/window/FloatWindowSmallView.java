@@ -2,6 +2,7 @@ package com.dream.app.quicklaunch.window;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,6 +16,8 @@ import com.dream.app.quicklaunch.util.Utils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FloatWindowSmallView extends LinearLayout {
     private static final String TAG = FloatWindowSmallView.class.getSimpleName();
@@ -66,6 +69,8 @@ public class FloatWindowSmallView extends LinearLayout {
     List<AppInfo> mSelectedAppInfos = new ArrayList<AppInfo>();
 
     private int count = 0;
+    private int TIME_DIFF = 300;
+    private int TIME_DURATION = 2 * 1000;
 
     /**
      * start activity with given click times
@@ -85,6 +90,8 @@ public class FloatWindowSmallView extends LinearLayout {
         }
     }
 
+    private boolean flag = false;
+
     public FloatWindowSmallView(Context context) {
         super(context);
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -93,6 +100,8 @@ public class FloatWindowSmallView extends LinearLayout {
         viewWidth = view.getLayoutParams().width;
         viewHeight = view.getLayoutParams().height;
     }
+
+    List<Long> mClickArray = new ArrayList<Long>();
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -103,15 +112,54 @@ public class FloatWindowSmallView extends LinearLayout {
                 yInView = event.getY();
                 xInScreen = event.getRawX();
                 yInScreen = event.getRawY() - getStatusBarHeight();
+                Log.d(TAG, "action down");
+
+                long time = System.currentTimeMillis();
+                int size = mClickArray.size() - 1;
+                if (mClickArray.size() > 1) {
+                    if (time - mClickArray.get(size - 1) > TIME_DURATION) {
+                        mClickArray.clear();
+                    }
+                }
+
+                mClickArray.add(time);
+                flag = true;
+                if (mClickArray.size() == 1) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (flag) {
+                                if (mClickArray.size() <= 4) {
+                                    handleUp(mClickArray.size());
+                                    mClickArray.clear();
+                                }
+                            }
+                        }
+                    }, TIME_DURATION);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 xInScreen = event.getRawX();
                 yInScreen = event.getRawY() - getStatusBarHeight();
                 // 手指移动的时候更新小悬浮窗的位置
                 updateViewPosition();
+                float xdiff = (xInScreen - xInView);
+                float ydiff = (yInScreen - yInView);
+                Log.d(TAG, "action move");
+                if (xdiff * xdiff + ydiff * ydiff < 25f) {
+
+                } else {
+                    flag = false;
+                }
+
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                Log.d(TAG, "action cancel");
+                flag = false;
                 break;
             case MotionEvent.ACTION_UP:
-                handleUp();
+                Log.d(TAG, "action up");
+
                 break;
             default:
                 break;
@@ -157,7 +205,19 @@ public class FloatWindowSmallView extends LinearLayout {
         return statusBarHeight;
     }
 
-    private void handleUp() {
+    private void handleUp(int count) {
         Log.d(TAG, "handleUp called!");
+        if (mSelectedAppInfos == null || mSelectedAppInfos.size() <= 0) {
+            mSelectedAppInfos = Utils.loadSelectedApp(getContext());
+        }
+        //start activity
+        if (count <= 0 || count > mSelectedAppInfos.size()) {
+            return;
+        }
+
+        getContext().startActivity(mSelectedAppInfos.get(count - 1).getIntent());
     }
+
+    private Handler mHandler = new Handler();
+
 }

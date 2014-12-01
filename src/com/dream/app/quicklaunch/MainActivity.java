@@ -27,7 +27,6 @@ public class MainActivity extends Activity {
     QuickLaunchAdapter mAdapter;
     List<AppInfo> mInstalledAppInfo = new ArrayList<AppInfo>();
     List<AppInfo> mSelectedAppInfos = new ArrayList<AppInfo>();
-
     ButtonFloat mBtnAdd;
     boolean isAdd = false; //true, add, false change;
 

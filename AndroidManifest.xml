@@ -17,5 +17,12 @@
             </intent-filter>
         </activity>
         <service android:name=".window.FloatWindowService"></service>
+        <receiver android:name=".window.RepeatBroadcastReceiver">
+
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="action_repeat_service"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
