@@ -16,7 +16,8 @@ target/
 # Local configuration file (sdk path, etc)
 local.properties
 .gitattributes
-
+# idea project
+*.iml
 # Eclipse project files
 .classpath
 .project
